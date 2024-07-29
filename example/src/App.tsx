@@ -1,6 +1,10 @@
 import * as React from 'react';
 
-import { FasterImageView, clearCache } from '@candlefinance/faster-image';
+import {
+  FasterImageView,
+  clearCache,
+  prefetch,
+} from '@candlefinance/faster-image';
 import {
   Button,
   DevSettings,
@@ -22,6 +26,9 @@ if (__DEV__ && Platform.OS === 'ios') {
     const result = await clearCache();
     console.log('cache cleared', result);
   });
+  DevSettings.addMenuItem('Prefetch', async () => {
+    await Promise.all(imageURLs.map(prefetch));
+  });
 }
 
 export default function App() {
@@ -29,16 +36,25 @@ export default function App() {
   return (
     <SafeAreaView style={styles.container}>
       <Button
+        title="Refresh"
+        onPress={async () => {
+          setData([]);
+          setTimeout(() => {
+            setData(imageURLs);
+          }, 100);
+        }}
+      />
+      <Button
         title="Clear Cache"
-        onPress={() => {
-          clearCache()
-            .then((result) => {
-              console.log('cache cleared', result);
-              setData([]);
-            })
-            .then(() => {
-              setData(imageURLs);
-            });
+        onPress={async () => {
+          await clearCache();
+          console.log('cache cleared');
+        }}
+      />
+      <Button
+        title="Prefetch first 6 images"
+        onPress={async () => {
+          await Promise.all(imageURLs.slice(0, 6).map(prefetch));
         }}
       />
       {/* <FasterImageView

@@ -1,5 +1,6 @@
 @objc(FasterImageViewManager)
 final class FasterImageViewManager: RCTViewManager {
+    var prefetchers: [String: ImagePrefetcher] = [:]
 
     override func view() -> (FasterImageView) {
         return FasterImageView()
@@ -17,8 +18,25 @@ final class FasterImageViewManager: RCTViewManager {
             ImageCache.shared.removeAll()
             DataLoader.sharedUrlCache.removeAllCachedResponses()
             DispatchQueue.main.async {
-                resolve(true)
+                resolve(nil)
             }
+        }
+    }
+    
+    @objc(prefetch:resolver:rejecter:)
+    func prefetch(_ url: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        guard let url = URL(string: url) else {
+            return reject("InvalidArgument", "Could not create native url from string: \(url)", nil)
+        }
+        
+        let prefetcher = ImagePrefetcher()
+        prefetcher.didComplete = { [weak self] in
+            self?.prefetchers[url.absoluteString] = nil
+        }
+        prefetcher.startPrefetching(with: [url])
+        self.prefetchers[url.absoluteString] = prefetcher
+        DispatchQueue.main.async {
+            resolve(nil)
         }
     }
 }
