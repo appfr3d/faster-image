@@ -49,7 +49,7 @@ final class FasterImageViewManager: RCTViewManager {
                 self?.prefetchers[url.absoluteString] = nil
             }
             
-            var imageRequest = ImageRequest(urlRequest: urlRequest)
+            let imageRequest = ImageRequest(urlRequest: urlRequest)
             
             prefetcher.startPrefetching(with: [imageRequest])
             
