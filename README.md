@@ -48,7 +48,11 @@ yarn add @candlefinance/faster-image
 ## Usage
 
 ```js
-import { FasterImageView, clearCache } from '@candlefinance/faster-image';
+import {
+  FasterImageView,
+  clearCache,
+  prefetch,
+} from '@candlefinance/faster-image';
 
 <FasterImageView
   style={styles.image}
