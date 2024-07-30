@@ -31,13 +31,13 @@ A performant way to render images in React Native with a focus on speed and memo
   - [x] Base64 encoded image
 - [x] Animated transition
 - [x] Failure image
+- [x] Prefetch support
 - [x] Typescript support
 - [x] Written in Swift/Kotlin
 
 ## To be added
 
 - [ ] GIF support
-
 
 ## Installation
 
@@ -67,6 +67,9 @@ import { FasterImageView, clearCache } from '@candlefinance/faster-image';
 
 // Clear memory and disk cache
 await clearCache();
+
+// Prefetch image to memory and disk cache
+await prefetch({ url: 'https://picsum.photos/200/200?random=1' });
 ```
 
 ## Props
@@ -78,8 +81,8 @@ await clearCache();
 | resizeMode                | string                 | contain                  | The resize mode of the image                                                                         |
 | thumbhash                 | string                 |                          | The thumbhash of the image as a base64 encoded string to show while loading (Android not tested)     |
 | blurhash                  | string                 |                          | The blurhash of the image to show while loading (iOS only)                                           |
-| showActivityIndicator     | boolean                | false (iOS only)         | Whether to show the UIActivityIndicatorView indicator when the image is loading   
-| activityColor             | ColorValue             | undefined (iOS only)     | Activity indicator color. Changed default activity indicator color. Only hex supported     |
+| showActivityIndicator     | boolean                | false (iOS only)         | Whether to show the UIActivityIndicatorView indicator when the image is loading                      |
+| activityColor             | ColorValue             | undefined (iOS only)     | Activity indicator color. Changed default activity indicator color. Only hex supported               |
 | base64Placeholder         | string                 |                          | The base64 encoded placeholder image to show while the image is loading                              |
 | cachePolicy               | string                 | memory                   | The cache policy of the image                                                                        |
 | transitionDuration        | number                 | 0.75 (iOS) Android (100) | The transition duration of the image                                                                 |
