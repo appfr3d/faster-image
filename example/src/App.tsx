@@ -27,7 +27,9 @@ if (__DEV__ && Platform.OS === 'ios') {
     console.log('cache cleared', result);
   });
   DevSettings.addMenuItem('Prefetch', async () => {
-    await Promise.all(imageURLs.map(prefetch));
+    await Promise.all(
+      imageURLs.map((url) => prefetch({ url, cachePolicy: 'memory' }))
+    );
   });
 }
 
@@ -54,7 +56,11 @@ export default function App() {
       <Button
         title="Prefetch first 6 images"
         onPress={async () => {
-          await Promise.all(imageURLs.slice(0, 6).map(prefetch));
+          await Promise.all(
+            imageURLs
+              .slice(0, 6)
+              .map((url) => prefetch({ url, cachePolicy: 'memory' }))
+          );
         }}
       />
       {/* <FasterImageView

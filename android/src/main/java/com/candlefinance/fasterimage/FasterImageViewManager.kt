@@ -55,7 +55,32 @@ import com.facebook.react.uimanager.events.RCTEventEmitter
       val imageLoader = reactApplicationContext.imageLoader
       imageLoader.memoryCache?.clear()
       imageLoader.diskCache?.clear()
-      promise.resolve(true)
+      promise.resolve(null)
+    }
+
+    @ReactMethod
+    fun prefetch(options: ReadableMap, promise: Promise) {
+      val url = options.getString("url")
+      val cachePolicy = options.getString("cachePolicy")
+      val headers = options.getMap("headers")
+
+      val imageLoader = reactApplicationContext.imageLoader
+      val requestBuilder = ImageRequest.Builder(reactApplicationContext)
+        .data(url)
+
+      headers?.let {
+        for (entry in it.entryIterator) {
+          requestBuilder.setHeader(entry.key, entry.value as String)
+        }
+      }
+
+      val request = requestBuilder
+        .memoryCachePolicy(if (cachePolicy == "memory") CachePolicy.ENABLED else CachePolicy.DISABLED)
+        .diskCachePolicy(if (cachePolicy == "discWithCacheControl" || cachePolicy == "discNoCacheControl") CachePolicy.ENABLED else CachePolicy.DISABLED)
+        .build()
+
+      imageLoader.enqueue(request)
+      promise.resolve(null)
     }
   }
 
