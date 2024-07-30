@@ -24,19 +24,44 @@ final class FasterImageViewManager: RCTViewManager {
     }
     
     @objc(prefetch:resolver:rejecter:)
-    func prefetch(_ url: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
-        guard let url = URL(string: url) else {
-            return reject("InvalidArgument", "Could not create native url from string: \(url)", nil)
-        }
+    func prefetch(_ options: NSDictionary, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
         
-        let prefetcher = ImagePrefetcher()
-        prefetcher.didComplete = { [weak self] in
-            self?.prefetchers[url.absoluteString] = nil
-        }
-        prefetcher.startPrefetching(with: [url])
-        self.prefetchers[url.absoluteString] = prefetcher
-        DispatchQueue.main.async {
-            resolve(nil)
+        do {
+            let options = try DictionaryDecoder().decode(ImagePrefetchOptions.self, from: options)
+            
+            guard let url = URL(string: options.url) else {
+                return reject("InvalidArgument", "Could not create native url from string: \(options.url)", nil)
+            }
+            
+            var urlRequest = URLRequest(url: url)
+            urlRequest.allHTTPHeaderFields = options.headers
+            
+            let pipeline: ImagePipeline
+            if let cachePolicy = options.cachePolicy  {
+                pipeline = CachePolicy(rawValue: cachePolicy)?.pipeline ?? .shared
+            } else {
+                pipeline = .shared
+            }
+            
+            let prefetcher = ImagePrefetcher(pipeline: pipeline)
+            
+            prefetcher.didComplete = { [weak self] in
+                self?.prefetchers[url.absoluteString] = nil
+            }
+            
+            var imageRequest = ImageRequest(urlRequest: urlRequest)
+            
+            prefetcher.startPrefetching(with: [imageRequest])
+            
+            self.prefetchers[url.absoluteString] = prefetcher
+            
+            DispatchQueue.main.async {
+                resolve(nil)
+            }
+            
+            // return reject("InvalidArgument", "Could not create native url from string: \(urlString)", nil)
+        } catch {
+            return reject("MissingArgument", "No url provided", nil)
         }
     }
 }
@@ -60,6 +85,12 @@ struct ImageOptions: Decodable {
     let url: String
     let headers: [String: String]?
     let grayscale: Double?
+}
+
+struct ImagePrefetchOptions: Decodable {
+    let url: String
+    let headers: [String: String]?
+    let cachePolicy: String?
 }
 
 struct BorderRadii {

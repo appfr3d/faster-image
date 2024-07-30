@@ -28,7 +28,12 @@ export type AndroidImageResizeMode =
   | 'top'
   | 'bottom';
 
-/*
+export type CachePolicy =
+  | 'memory'
+  | 'discWithCacheControl'
+  | 'discNoCacheControl';
+
+/**
  * @property {string} url - URL of the image **required**
  * @property {string} [base64Placeholder] - Base64 encoded placeholder image
  * @property {string} [blurhash] - Blurhash of the image (base64 encoded)
@@ -38,8 +43,8 @@ export type AndroidImageResizeMode =
  * @property {ColorValue} [activityColor] - Activity indicator color. Changed default activity indicator color if specified. Defaults to undefined (iOS only)
  * @property {number} [transitionDuration] - Duration of the transition animation in seconds, defaults to 0.75
  * @property {string} [failureImage] - Image to show when the image fails to load, pass blurhash, thumbhash or base64 encoded image
- * @property {boolean} [progressiveLoadingEnabled] - Enable progressive loading, defaults to false
- * @property {('memory' | 'discWithCacheControl' | 'discNoCacheControl')} [cachePolicy] - Cache [policy](https://kean-docs.github.io/nuke/documentation/nuke/imagepipeline), defaults to 'memory'. 'discWithCacheControl' will cache the image in the disc and use the cache control headers to determine if the image should be re-fetched. 'discNoCacheControl' will cache the image in the disc and never re-fetch it.
+ * @property {boolean} [progressiveLoadingEnabled] - Enable progressive loading, defaults to false (iOS only)
+ * @property {CachePolicy} [cachePolicy] - Cache [policy](https://kean-docs.github.io/nuke/documentation/nuke/imagepipeline), defaults to 'memory'. 'discWithCacheControl' will cache the image in the disc and use the cache control headers to determine if the image should be re-fetched. 'discNoCacheControl' will cache the image in the disc and never re-fetch it.
  * @property {number} [borderRadius] - Border radius of the image
  * @property {number} [borderTopLeftRadius] - Top left border radius of the image
  * @property {number} [borderTopRightRadius] - Top right border radius of the image
@@ -62,7 +67,7 @@ export type ImageOptions = {
   showActivityIndicator?: boolean;
   activityColor?: ColorValue;
   transitionDuration?: number;
-  cachePolicy?: 'memory' | 'discWithCacheControl' | 'discNoCacheControl';
+  cachePolicy?: CachePolicy;
   failureImage?: string;
   progressiveLoadingEnabled?: boolean;
   base64Placeholder?: string;
@@ -79,7 +84,7 @@ export type ImageOptions = {
  * @property {ImageOptions} source - Image source
  * @property {(result: { nativeEvent: { error: string } }) => void} [onError] - Callback for when an error occurs
  * @property {(result: { nativeEvent: { width: number; height: number; source: string; } }) => void} [onSuccess] - Callback for when the image loads successfully
- * */
+ */
 export type FasterImageProps = {
   style: ImageStyle | ImageStyle[];
   source: ImageOptions;
@@ -124,19 +129,31 @@ export const FasterImageView =
 export const clearCache = async (): Promise<void> => {
   if (Platform.OS === 'ios') {
     const { FasterImageViewManager } = NativeModules;
-    return FasterImageViewManager.clearCache();
+    return await FasterImageViewManager.clearCache();
   } else {
     const { FasterImageModule } = NativeModules;
-    return FasterImageModule.clearCache();
+    return await FasterImageModule.clearCache();
   }
 };
 
-export const prefetch = async (url: string): Promise<void> => {
+/**
+ * @property {string} url - URL of the image **required**
+ * @property {CachePolicy} [cachePolicy] - Cache [policy](https://kean-docs.github.io/nuke/documentation/nuke/imagepipeline), defaults to 'memory'. 'discWithCacheControl' will cache the image in the disc and use the cache control headers to determine if the image should be re-fetched. 'discNoCacheControl' will cache the image in the disc and never re-fetch it.
+ */
+export type ImagePrefetchOptions = {
+  url: string;
+  cachePolicy?: CachePolicy;
+  headers?: Record<string, string>;
+};
+
+export const prefetch = async (
+  options: ImagePrefetchOptions
+): Promise<void> => {
   if (Platform.OS === 'ios') {
     const { FasterImageViewManager } = NativeModules;
-    return FasterImageViewManager.prefetch(url);
+    return await FasterImageViewManager.prefetch(options);
   } else {
     const { FasterImageModule } = NativeModules;
-    return FasterImageModule.prefetch(url);
+    return await FasterImageModule.prefetch(options);
   }
 };

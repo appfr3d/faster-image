@@ -11,7 +11,7 @@ RCT_EXPORT_VIEW_PROPERTY(onSuccess, RCTDirectEventBlock)
 RCT_EXTERN_METHOD(clearCache:(RCTPromiseResolveBlock)resolve 
                   rejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(prefetch:(NSString *)url
+RCT_EXTERN_METHOD(prefetch:(NSDictionary *)options
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 @end
