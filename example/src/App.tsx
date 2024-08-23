@@ -103,7 +103,7 @@ export default function App() {
                 Platform.OS === 'android' ? size : (size - 16) / 2,
               borderBottomRightRadius:
                 Platform.OS === 'android' ? size / 1.5 : (size - 16) / 3,
-              cachePolicy: 'discWithCacheControl',
+              cachePolicy: 'memory',
               showActivityIndicator: true,
               url: item,
               grayscale: 1,

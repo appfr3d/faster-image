@@ -12,6 +12,6 @@ class FasterImagePackage : ReactPackage {
   }
 
   override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
-    return listOf(FasterImageViewManager())
+    return listOf(FasterImageViewManager(reactContext))
   }
 }
